@@ -1,0 +1,124 @@
+{
+  "reviews": [
+    {
+      "professorName": "Dr. Alice Roberts",
+      "subject": "Physics",
+      "review": "Dr. Roberts is an amazing professor who makes complex topics easy to understand. Highly recommend!",
+      "starRating": 5
+    },
+    {
+      "professorName": "Dr. Mark Thompson",
+      "subject": "Mathematics",
+      "review": "Dr. Thompson is very knowledgeable, but his lectures can be dry. Prepare to put in extra effort outside of class.",
+      "starRating": 3
+    },
+    {
+      "professorName": "Dr. Jessica Lee",
+      "subject": "Biology",
+      "review": "Dr. Lee is a great professor, but her exams are tough. Make sure to study the lecture notes thoroughly.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. Daniel Clark",
+      "subject": "Chemistry",
+      "review": "Dr. Clark is enthusiastic and makes the subject interesting, but the labs can be overwhelming.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. Emily Martinez",
+      "subject": "English Literature",
+      "review": "Dr. Martinez is very engaging and encourages critical thinking. However, her grading is strict.",
+      "starRating": 3
+    },
+    {
+      "professorName": "Dr. John Smith",
+      "subject": "Computer Science",
+      "review": "Dr. Smith is an excellent professor with a deep understanding of the subject. His assignments are challenging but rewarding.",
+      "starRating": 5
+    },
+    {
+      "professorName": "Dr. Rachel Adams",
+      "subject": "History",
+      "review": "Dr. Adams brings history to life with her engaging lectures. She's very approachable and helpful.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. William Johnson",
+      "subject": "Economics",
+      "review": "Dr. Johnson's lectures are clear and well-structured, but the material can be dry at times.",
+      "starRating": 3
+    },
+    {
+      "professorName": "Dr. Susan Brown",
+      "subject": "Philosophy",
+      "review": "Dr. Brown is a thoughtful professor who encourages deep thinking and discussion. Her classes are intellectually stimulating.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. Michael Green",
+      "subject": "Political Science",
+      "review": "Dr. Green is passionate about the subject, but his lectures can be disorganized at times.",
+      "starRating": 3
+    },
+    {
+      "professorName": "Dr. Laura Wilson",
+      "subject": "Sociology",
+      "review": "Dr. Wilson is an excellent professor who makes sociology relevant and interesting. Highly recommend taking her class.",
+      "starRating": 5
+    },
+    {
+      "professorName": "Dr. Charles White",
+      "subject": "Psychology",
+      "review": "Dr. White's lectures are fascinating and well-organized. He makes complex concepts easy to understand.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. Karen Harris",
+      "subject": "Anthropology",
+      "review": "Dr. Harris is a knowledgeable professor, but her lectures can be a bit dry. The material is interesting though.",
+      "starRating": 3
+    },
+    {
+      "professorName": "Dr. David Clark",
+      "subject": "Environmental Science",
+      "review": "Dr. Clark is passionate about the environment and his enthusiasm is contagious. His projects are very hands-on.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. Patricia King",
+      "subject": "Art History",
+      "review": "Dr. King is an inspiring professor who makes art history come alive. Her assignments are challenging but rewarding.",
+      "starRating": 5
+    },
+    {
+      "professorName": "Dr. Andrew Scott",
+      "subject": "Astronomy",
+      "review": "Dr. Scott is a great professor who makes astronomy fascinating. His classes are a must for anyone interested in space.",
+      "starRating": 5
+    },
+    {
+      "professorName": "Dr. Linda Taylor",
+      "subject": "Statistics",
+      "review": "Dr. Taylor is very organized and makes statistics understandable. However, the homework load can be heavy.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. George Allen",
+      "subject": "Business Administration",
+      "review": "Dr. Allen has a lot of real-world experience and brings that into his lectures. His classes are very practical.",
+      "starRating": 4
+    },
+    {
+      "professorName": "Dr. Jennifer Lewis",
+      "subject": "Marketing",
+      "review": "Dr. Lewis is a dynamic professor who makes marketing fun and engaging. Her projects are very creative.",
+      "starRating": 5
+    },
+    {
+      "professorName": "Dr. Brian Robinson",
+      "subject": "Finance",
+      "review": "Dr. Robinson is a tough but fair professor. His exams are challenging, but you will learn a lot from his class.",
+      "starRating": 4
+    }
+  ]
+}
