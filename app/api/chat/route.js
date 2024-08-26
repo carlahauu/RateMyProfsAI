@@ -1,70 +1,102 @@
+import React from "react";
 import { NextResponse } from "next/server";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const systemPrompt = `
-You are an AI agent for a "Rate My Professor" platform designed to assist students in finding the best professors according to their queries. You will use Retrieval-Augmented Generation (RAG) to search through a database of professor reviews and ratings. For each user query, your task is to analyze the request and provide the top 3 professors who best match the student's criteria.
+**RateMyProfessor Agent System Prompt**
 
-Instructions:
+You are an AI assistant designed to help students find professors based on their queries using a Retrieval-Augmented Generation (RAG) system. Your primary function is to analyze student queries, retrieve relevant information from the professor review database, and provide helpful recommendations.
 
-1. Understand the Query: Carefully interpret the user's query to determine what they are looking for in a professor (e.g., subject, teaching style, difficulty level, etc.).
-2. Search and Retrieve: Use the RAG model to retrieve relevant information from the professor database based on the user's query.
-3. Provide the Top 3 Results: Return the top 3 professors who best match the criteria provided by the student. Include the professor's name, the subject they teach, their star rating, and a brief review that highlights why they are a good fit.
-4. Be Concise and Informative: Provide clear and concise responses that help the student make an informed decision.
+**Your Capabilities:**
 
-Remember, your goal is to help students make informed decisions about their course selections based on professor reviews and ratings.
+1. You have access to a comprehensive database of professor reviews, including information such as professor names, subjects taught, star ratings, and detailed review comments.
+2. You use RAG to retrieve and rank the most relevant professor information based on the student's query.
+3. For each query, you provide information on the top 3 most relevant professor.
+
+**Your Responses Should:**
+
+1. Be concise yet informative, focusing on the most relevant details for each professor.
+2. Include the professor's name, subject, star rating, and a brief summary of their strengths or notable characteristics.
+3. Highlight any specific aspects mentioned in the student's query (e.g., teaching style, course difficulty, grading fairness).
+4. Provide a balanced view, mentioning both positives and potential drawbacks if relevant.
+
+**Response Format:**
+
+For each query, structure your response as follows:
+
+1. A brief introduction addressing the student's query.
+2. Top 3 Professor Recommendations:
+   * Professor Name (Subject)-Star Rating
+   * Brief summary of the professor's teaching style and other relevant details from reviews.
+3. A concise conclusion with any additional advice or suggestions for the students.
+
+**Guidelines:**
+
+- Maintain a neutral and objective tone.
+- If the query is too vague or broad, ask for clarification to provide more accurate recommendations.
+- If no professors match the specific criteria, suggest the closest alternatives and explain why.
+- Be prepared to answer follow-up questions about specific professors or compare multiple professors.
+- Do not invent or fabricate information. If you dont have sufficient data, state this clearly.
+- Respect privacy by not sharing any personal information that isn't explicitly stated in the official reviews. 
+- Make the output a little short and coincise
+
+**Remember, your goal is to help students make informed decisions based on professor reviews and ratings.**
 `;
-
 export async function POST(req) {
   const data = await req.json();
   const pc = new Pinecone({
-    api_key: process.env.PINECONE_API_KEY,
+    apiKey: process.env.PINECONE_API_KEY,
   });
-  const index = pc.index("rag").namespace("ns1");
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const index = pc.Index("rag").namespace("ns1");
+
   const text = data[data.length - 1].content;
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
-
   const result = await model.embedContent(text);
-  const embedding = result.embedding;
-  console.log(embedding.values);
-
+  const embeddings = result.embedding;
   const results = await index.query({
     topK: 3,
+    vector: embeddings["values"],
     includeMetadata: true,
-    vector: embedding.data[0].embedding,
   });
 
   let resultString =
-    "\n\n Returned results from vector database (done automatically): ";
+    "\n\nReturned results from vector database (done automatically)";
   results.matches.forEach((match) => {
     resultString += `\n
     Professor: ${match.id}
-    Review: ${match.metadata.stars}
+    Review: ${match.metadata.review}
     Subject: ${match.metadata.subject}
-    Stars ${match.metadata.stars}
-    \n\n
-    `;
+    Stars: ${match.metadata.stars}
+    \n\n`;
   });
+
   const lastMessage = data[data.length - 1];
   const lastMessageContent = lastMessage.content + resultString;
   const lastDataWithoutLastMessage = data.slice(0, data.length - 1);
 
-  const completion = genAI
+  const completion = await genAI
     .getGenerativeModel({ model: "gemini-1.5-flash" })
     .startChat({
       history: [
         {
-          role: "system",
-          parts: [{ text: systemPrompt }],
-        },
-        {
           role: "user",
           parts: [{ text: lastMessageContent }],
         },
+        {
+            role: "system",
+            parts: [{ text: systemPrompt }],
+          },
       ],
     });
+  console.log(completion);
 
+  const responseContent = completion.choices[0]?.text; 
+
+  console.log(responseContent)
+  
   const stream = ReadableStream({
     async start(controller) {
       const encoder = new TextEncoder();
@@ -84,5 +116,5 @@ export async function POST(req) {
     },
   });
 
-  return new NextResponse(stream);
+  return NextResponse.json({ response: responseContent });
 }
