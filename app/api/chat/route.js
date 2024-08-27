@@ -1,7 +1,6 @@
-import React from "react";
 import { NextResponse } from "next/server";
 import { Pinecone } from "@pinecone-database/pinecone";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const systemPrompt = `
 **RateMyProfessor Agent System Prompt**
@@ -40,6 +39,8 @@ For each query, structure your response as follows:
 - Do not invent or fabricate information. If you dont have sufficient data, state this clearly.
 - Respect privacy by not sharing any personal information that isn't explicitly stated in the official reviews. 
 - Make the output a little short and coincise
+- Break down each professor into its own paragraph.
+
 
 **Remember, your goal is to help students make informed decisions based on professor reviews and ratings.**
 `;
@@ -48,73 +49,32 @@ export async function POST(req) {
   const pc = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY,
   });
-  const index = pc.Index("rag").namespace("ns1");
 
-  const text = data[data.length - 1].content;
-
+  const index = pc.index("rag").namespace("ns1");
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const text = data[data.length - 1].content;
   const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
   const result = await model.embedContent(text);
-  const embeddings = result.embedding;
+  const embedding = result.embedding;
   const results = await index.query({
     topK: 3,
-    vector: embeddings["values"],
     includeMetadata: true,
+    vector: embedding.values,
   });
-
-  let resultString =
-    "\n\nReturned results from vector database (done automatically)";
+  let resultString = "\n\nReturned results from vector db(done automatically):";
   results.matches.forEach((match) => {
     resultString += `\n
-    Professor: ${match.id}
-    Review: ${match.metadata.review}
-    Subject: ${match.metadata.subject}
-    Stars: ${match.metadata.stars}
+    Professor:${match.id}
+    Review:${match.metadata.stars}
+    Subject:${match.metadata.subject}
+    Stars ${match.metadata.stars}
     \n\n`;
   });
+  const model_gen = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const gen_result = await model_gen.generateContent(
+    `${systemPrompt}\nQuery: ${text}\n${data}\n`
+  );
+  const response = await gen_result.response.text();
 
-  const lastMessage = data[data.length - 1];
-  const lastMessageContent = lastMessage.content + resultString;
-  const lastDataWithoutLastMessage = data.slice(0, data.length - 1);
-
-  const completion = await genAI
-    .getGenerativeModel({ model: "gemini-1.5-flash" })
-    .startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: lastMessageContent }],
-        },
-        {
-            role: "system",
-            parts: [{ text: systemPrompt }],
-          },
-      ],
-    });
-  console.log(completion);
-
-  const responseContent = completion.choices[0]?.text; 
-
-  console.log(responseContent)
-  
-  const stream = ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder();
-      try {
-        for await (const chunk of completion) {
-          const content = chunk.choices[0]?.delta?.content;
-          if (content) {
-            const text = encoder.encode(content);
-            controller.enqueue(text);
-          }
-        }
-      } catch (err) {
-        controller.error(err);
-      } finally {
-        controller.close();
-      }
-    },
-  });
-
-  return NextResponse.json({ response: responseContent });
+  return new NextResponse(response);
 }

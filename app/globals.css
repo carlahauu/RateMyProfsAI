@@ -1,0 +1,54 @@
+.appContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+}
+
+.reviewsContainer {
+  max-height: 100vh;
+  overflow-y: scroll;
+  width: 40vw;
+  background: white;
+  padding: 20px;
+}
+
+.professors{
+    color: black;
+    margin-top: 10px;
+}
+
+.review{
+    color: black;
+    background: #ededed;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.messagesContainer{
+    max-height: 100%;
+    overflow: auto;
+    flex-grow: 1;
+    color: black;
+}
+
+.message{
+    margin-bottom: 10px;
+}
+
+.chatContainer{
+    width: 55vw;
+    height: 700px;
+    display: flex;
+    flex-direction: column;
+    border-style: solid;
+    border-color: white;
+    color: black;
+    background-color: white;
+    padding: 10px;
+}
+
+.inputs{
+    display: flex;
+    margin-top: 20px;
+}

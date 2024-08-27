@@ -1,10 +1,17 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
-import styles from "./page.module.css";
+import { useState, useEffect } from "react";
+import "./globals.css";
 import { Box, Button, Stack, TextField } from "@mui/material";
+import ReactMarkdown from "react-markdown";
+import reviewsData from "../reviews.json";
 
 export default function Home() {
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    setReviews(reviewsData.reviews);
+  }, []);
+
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -15,68 +22,64 @@ export default function Home() {
   const [message, setMessage] = useState("");
 
   const sendMessage = async () => {
+    setMessage("");
     setMessages((messages) => [
       ...messages,
       { role: "user", content: message },
       { role: "assistant", content: "" },
     ]);
 
-    setMessage("");
-
-    const response = await fetch('/api/chat', {
-      method: 'POST',
+    const response = fetch("/api/chat", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify([...messages, { role: 'user', content: message }]),
-    });
+      body: JSON.stringify([...messages, { role: "user", content: message }]),
+    }).then(async (res) => {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let result = "";
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let result = '';
-
-    return reader.read().then(function processText({ done, value }) {
-      if (done) {
-        return result;
-      }
-      const text = decoder.decode(value || new Uint8Array(), { stream: true });
-      setMessages((messages) => {
-        let lastMessage = messages[messages.length - 1];
-        let otherMessages = messages.slice(0, messages.length - 1);
-        return [
-          ...otherMessages,
-          { ...lastMessage, content: lastMessage.content + text },
-        ];
+      return reader.read().then(function processText({ done, value }) {
+        if (done) {
+          return result;
+        }
+        const text = decoder.decode(value || new Uint8Array(), {
+          stream: true,
+        });
+        setMessages((messages) => {
+          let lastMessage = messages[messages.length - 1];
+          let otherMessages = messages.slice(0, messages.length - 1);
+          return [
+            ...otherMessages,
+            { ...lastMessage, content: lastMessage.content + text },
+          ];
+        });
+        return reader.read().then(processText);
       });
-      return reader.read().then(processText);
     });
   };
+
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Stack
-        direction={"column"}
-        width="500px"
-        height="700px"
-        border="1px solid black"
-        p={2}
-        spacing={3}
-      >
-        <Stack
-          direction={"column"}
-          spacing={2}
-          flexGrow={1}
-          overflow="auto"
-          maxHeight="100%"
-        >
+    <div className="appContainer">
+      <div className="reviewsContainer">
+        <div className="professorsContainer">
+          <h1 className="professors">Professors</h1>
+        </div>
+        {reviews.map((review, index) => (
+          <div className="review">
+            <h3>{review.professorName}</h3>
+            <p>Subject: {review.subject}</p>
+            <p>Review: {review.review}</p>
+            <p>Rating: {review.starRating} ⭐</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="chatContainer">
+        <div className="messagesContainer">
           {messages.map((message, index) => (
-            <Box
+            <div
               key={index}
               display="flex"
               justifyContent={
@@ -84,21 +87,22 @@ export default function Home() {
               }
             >
               <Box
+                className="message"
                 bgcolor={
                   message.role === "assistant"
                     ? "primary.main"
                     : "secondary.main"
                 }
+                borderRadius={5}
                 color="white"
-                borderRadius={16}
-                p={3}
+                p={2}
               >
-                {message.content}
+                <ReactMarkdown>{message.content}</ReactMarkdown>
               </Box>
-            </Box>
+            </div>
           ))}
-        </Stack>
-        <Stack direction={"row"} spacing={2}>
+        </div>
+        <div className="inputs">
           <TextField
             label="Message"
             fullWidth
@@ -108,8 +112,8 @@ export default function Home() {
           <Button variant="contained" onClick={sendMessage}>
             Send
           </Button>
-        </Stack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
